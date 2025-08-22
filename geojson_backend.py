@@ -535,6 +535,7 @@ def _filter_graph_by_types(gg: GeoGraph, allowed: Set[str]) -> GeoGraph:
 
 def _build_graph(features: Iterable[dict]) -> GeoGraph:
 	G = nx.DiGraph()
+	lane_interior_nodes: Set[Tuple[float,float]] = set()
 	# Build nodes/edges with feature tracking for lane-hopping detection
 	for feat_idx, feat in enumerate(features):
 		geom = feat.get("geometry", {})
@@ -567,8 +568,12 @@ def _build_graph(features: Iterable[dict]) -> GeoGraph:
 			continue
 			
 		oneway = stype in GRAPH_ONEWAY_TYPES
-		# Each coordinate is lon,lat in GeoJSON
-		prev_ll = tuple(coords[0])  # (lon,lat)
+		prev_ll = tuple(coords[0])
+		if stype == "separation_lane" and len(coords) > 2:
+			# Record interior nodes (exclude endpoints)
+			for interior in coords[1:-1]:
+				lane_interior_nodes.add(tuple(interior))
+
 		for cur in coords[1:]:
 			cur_ll = tuple(cur)
 			if prev_ll == cur_ll:
