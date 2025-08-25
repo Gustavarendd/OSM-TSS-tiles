@@ -98,6 +98,7 @@ def correct_geojson(req: GeoJSONRouteRequest):
             sample_spacing_m=req.sample_spacing_m,
             debug=req.debug,
             multi_clusters=req.multi_clusters,
+            prevent_lane_hopping=True,  # Enforce strict lane direction following
             only_lanes=False,  # Include all routable types for better connectivity
         )
     except GeoNoTSSDataError as e:
